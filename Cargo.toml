@@ -1,0 +1,21 @@
+[package]
+name = "rwbin"
+description = "A Read-Write Binary Helper"
+categories = [ "encoding", "parsing" ]
+keywords = [ "binary", "encode", "decode", "serialize", "deserialize" ]
+license = "MIT"
+authors = ["uznami <siritoria@gmail.com>"]
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+thiserror = "2.0.12"
+tokio = { version = "1.44.1", features = [
+    "io-util",
+    "rt",
+    "rt-multi-thread",
+    "macros",
+] }
+
+[dev-dependencies]
+tokio = { version = "*", features = ["test-util", "fs"] }
