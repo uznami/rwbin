@@ -1,12 +1,14 @@
+use std::mem::size_of;
+
 pub trait Endian {
-    fn u16_to_bytes(value: u16) -> [u8; 2];
-    fn i16_to_bytes(value: i16) -> [u8; 2];
-    fn u32_to_bytes(value: u32) -> [u8; 4];
-    fn i32_to_bytes(value: i32) -> [u8; 4];
-    fn f32_to_bytes(value: f32) -> [u8; 4];
-    fn u64_to_bytes(value: u64) -> [u8; 8];
-    fn i64_to_bytes(value: i64) -> [u8; 8];
-    fn f64_to_bytes(value: f64) -> [u8; 8];
+    fn u16_to_bytes(value: u16) -> [u8; size_of::<u16>()];
+    fn i16_to_bytes(value: i16) -> [u8; size_of::<i16>()];
+    fn u32_to_bytes(value: u32) -> [u8; size_of::<u32>()];
+    fn i32_to_bytes(value: i32) -> [u8; size_of::<i32>()];
+    fn f32_to_bytes(value: f32) -> [u8; size_of::<f32>()];
+    fn u64_to_bytes(value: u64) -> [u8; size_of::<u64>()];
+    fn i64_to_bytes(value: i64) -> [u8; size_of::<i64>()];
+    fn f64_to_bytes(value: f64) -> [u8; size_of::<f64>()];
 
     fn u16iter_to_bytes<T: Iterator<Item = u16>>(iter: T, capacity: usize) -> Vec<u8> {
         let mut result = Vec::with_capacity(capacity);
@@ -16,14 +18,14 @@ pub trait Endian {
         result
     }
 
-    fn u16_from_bytes(bytes: &[u8; 2]) -> u16;
-    fn i16_from_bytes(bytes: &[u8; 2]) -> i16;
-    fn u32_from_bytes(bytes: &[u8; 4]) -> u32;
-    fn i32_from_bytes(bytes: &[u8; 4]) -> i32;
-    fn f32_from_bytes(bytes: &[u8; 4]) -> f32;
-    fn u64_from_bytes(bytes: &[u8; 8]) -> u64;
-    fn i64_from_bytes(bytes: &[u8; 8]) -> i64;
-    fn f64_from_bytes(bytes: &[u8; 8]) -> f64;
+    fn u16_from_bytes(bytes: &[u8; size_of::<u16>()]) -> u16;
+    fn i16_from_bytes(bytes: &[u8; size_of::<i16>()]) -> i16;
+    fn u32_from_bytes(bytes: &[u8; size_of::<u32>()]) -> u32;
+    fn i32_from_bytes(bytes: &[u8; size_of::<i32>()]) -> i32;
+    fn f32_from_bytes(bytes: &[u8; size_of::<f32>()]) -> f32;
+    fn u64_from_bytes(bytes: &[u8; size_of::<u64>()]) -> u64;
+    fn i64_from_bytes(bytes: &[u8; size_of::<i64>()]) -> i64;
+    fn f64_from_bytes(bytes: &[u8; size_of::<f64>()]) -> f64;
 
     fn u16vec_from_bytes(bytes: &[u8]) -> Vec<u16> {
         assert!(bytes.len() % 2 == 0, "Invalid length for u16 array: {}", bytes.len());
@@ -37,10 +39,10 @@ pub trait Endian {
 }
 
 macro_rules! impl_to_bytes {
-    ($($fn:ident: ($t:ty, $len:expr, $conv:ident)),* $(,)?) => {
+    ($($fn:ident: ($t:ty, $conv:ident)),* $(,)?) => {
         $(
             #[inline]
-            fn $fn(value: $t) -> [u8; $len] {
+            fn $fn(value: $t) -> [u8; size_of::<$t>()] {
                 value.$conv()
             }
         )*
@@ -48,10 +50,10 @@ macro_rules! impl_to_bytes {
 }
 
 macro_rules! impl_from_bytes {
-    ($($fn:ident: ($t:ty, $len:expr, $conv:ident)),* $(,)?) => {
+    ($($fn:ident: ($t:ty, $conv:ident)),* $(,)?) => {
         $(
             #[inline]
-            fn $fn(bytes: &[u8; $len]) -> $t {
+            fn $fn(bytes: &[u8; size_of::<$t>()]) -> $t {
                 <$t>::$conv(*bytes)
             }
         )*
@@ -60,49 +62,49 @@ macro_rules! impl_from_bytes {
 pub struct LittleEndian;
 impl Endian for LittleEndian {
     impl_to_bytes! {
-        u16_to_bytes: (u16, 2, to_le_bytes),
-        i16_to_bytes: (i16, 2, to_le_bytes),
-        u32_to_bytes: (u32, 4, to_le_bytes),
-        i32_to_bytes: (i32, 4, to_le_bytes),
-        f32_to_bytes: (f32, 4, to_le_bytes),
-        u64_to_bytes: (u64, 8, to_le_bytes),
-        i64_to_bytes: (i64, 8, to_le_bytes),
-        f64_to_bytes: (f64, 8, to_le_bytes),
+        u16_to_bytes: (u16, to_le_bytes),
+        i16_to_bytes: (i16, to_le_bytes),
+        u32_to_bytes: (u32, to_le_bytes),
+        i32_to_bytes: (i32, to_le_bytes),
+        f32_to_bytes: (f32, to_le_bytes),
+        u64_to_bytes: (u64, to_le_bytes),
+        i64_to_bytes: (i64, to_le_bytes),
+        f64_to_bytes: (f64, to_le_bytes),
     }
 
     impl_from_bytes! {
-        u16_from_bytes: (u16, 2, from_le_bytes),
-        i16_from_bytes: (i16, 2, from_le_bytes),
-        u32_from_bytes: (u32, 4, from_le_bytes),
-        i32_from_bytes: (i32, 4, from_le_bytes),
-        f32_from_bytes: (f32, 4, from_le_bytes),
-        u64_from_bytes: (u64, 8, from_le_bytes),
-        i64_from_bytes: (i64, 8, from_le_bytes),
-        f64_from_bytes: (f64, 8, from_le_bytes),
+        u16_from_bytes: (u16, from_le_bytes),
+        i16_from_bytes: (i16, from_le_bytes),
+        u32_from_bytes: (u32, from_le_bytes),
+        i32_from_bytes: (i32, from_le_bytes),
+        f32_from_bytes: (f32, from_le_bytes),
+        u64_from_bytes: (u64, from_le_bytes),
+        i64_from_bytes: (i64, from_le_bytes),
+        f64_from_bytes: (f64, from_le_bytes),
     }
 }
 
 pub struct BigEndian;
 impl Endian for BigEndian {
     impl_to_bytes! {
-        u16_to_bytes: (u16, 2, to_be_bytes),
-        i16_to_bytes: (i16, 2, to_be_bytes),
-        u32_to_bytes: (u32, 4, to_be_bytes),
-        i32_to_bytes: (i32, 4, to_be_bytes),
-        f32_to_bytes: (f32, 4, to_be_bytes),
-        u64_to_bytes: (u64, 8, to_be_bytes),
-        i64_to_bytes: (i64, 8, to_be_bytes),
-        f64_to_bytes: (f64, 8, to_be_bytes),
+        u16_to_bytes: (u16, to_be_bytes),
+        i16_to_bytes: (i16, to_be_bytes),
+        u32_to_bytes: (u32, to_be_bytes),
+        i32_to_bytes: (i32, to_be_bytes),
+        f32_to_bytes: (f32, to_be_bytes),
+        u64_to_bytes: (u64, to_be_bytes),
+        i64_to_bytes: (i64, to_be_bytes),
+        f64_to_bytes: (f64, to_be_bytes),
     }
 
     impl_from_bytes! {
-        u16_from_bytes: (u16, 2, from_be_bytes),
-        i16_from_bytes: (i16, 2, from_be_bytes),
-        u32_from_bytes: (u32, 4, from_be_bytes),
-        i32_from_bytes: (i32, 4, from_be_bytes),
-        f32_from_bytes: (f32, 4, from_be_bytes),
-        u64_from_bytes: (u64, 8, from_be_bytes),
-        i64_from_bytes: (i64, 8, from_be_bytes),
-        f64_from_bytes: (f64, 8, from_be_bytes),
+        u16_from_bytes: (u16, from_be_bytes),
+        i16_from_bytes: (i16, from_be_bytes),
+        u32_from_bytes: (u32, from_be_bytes),
+        i32_from_bytes: (i32, from_be_bytes),
+        f32_from_bytes: (f32, from_be_bytes),
+        u64_from_bytes: (u64, from_be_bytes),
+        i64_from_bytes: (i64, from_be_bytes),
+        f64_from_bytes: (f64, from_be_bytes),
     }
 }
